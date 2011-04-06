@@ -115,7 +115,7 @@ describe Order do
     before { order.stub(:completed? => true, :store_credit_amount => 35) }
 
     it "should reduce remaining amount on a single credit when that credit satisfies the entire amount" do
-      user.stub(:store_credits => [store_credit_1])
+      user.stub_chain(:store_credits, :active).and_return([store_credit_1])
       store_credit_1.should_receive(:remaining_amount=).with(65)
       store_credit_1.should_receive(:save)
       order.send(:consume_users_credit)
@@ -123,7 +123,7 @@ describe Order do
 
     it "should reduce remaining amount on a mutliple creidts when a single credit does not satify the entire amount" do
       order.stub(:store_credit_amount => 55)
-      user.stub(:store_credits => [store_credit_2, store_credit_3])
+      user.stub_chain(:store_credits, :active).and_return([store_credit_2, store_credit_3])
       store_credit_2.should_receive(:update_attribute).with(:remaining_amount, 0)
       store_credit_3.should_receive(:update_attribute).with(:remaining_amount, 0)
       order.send(:consume_users_credit)
@@ -135,7 +135,6 @@ describe Order do
       order.should_receive(:consume_users_credit).at_least(1).times
       order.next!
     end
-
   end
 
 
